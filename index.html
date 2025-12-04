@@ -1,0 +1,531 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>倫敦巴黎 2025</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-pink: #FADADD; /* Sakura Pink */
+            --dark-pink: #D87093;
+            --bg-gray: #FAFAFA;
+            --text-dark: #4A4A4A;
+            --text-light: #888;
+            --white: #FFFFFF;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --radius: 16px;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-gray);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            padding-bottom: 80px; /* Space for bottom nav */
+        }
+
+        /* Header */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 { margin: 0; font-size: 1.2rem; color: var(--dark-pink); font-weight: 600; }
+        .budget-sum { font-size: 0.9rem; font-weight: bold; color: var(--text-dark); }
+
+        /* Container */
+        .container { padding: 15px; display: none; animation: fadeIn 0.3s ease; }
+        .container.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Cards */
+        .card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: var(--shadow);
+            border-left: 5px solid var(--primary-pink);
+            position: relative;
+        }
+
+        .card-date {
+            font-size: 0.85rem;
+            color: var(--dark-pink);
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .weather-badge {
+            background: #E0F7FA;
+            color: #006064;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+
+        .card-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; }
+        
+        .timeline-item {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 12px;
+            border-left: 2px solid #eee;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 6px;
+            width: 10px;
+            height: 10px;
+            background: var(--primary-pink);
+            border-radius: 50%;
+        }
+
+        .timeline-time { font-size: 0.8rem; color: var(--text-light); }
+        .timeline-content { font-size: 0.95rem; margin-top: 2px; }
+
+        /* Buttons & Tags */
+        .btn-nav {
+            display: inline-block;
+            background: var(--bg-gray);
+            color: var(--dark-pink);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            text-decoration: none;
+            margin-top: 5px;
+            border: 1px solid var(--primary-pink);
+        }
+
+        .tag {
+            display: inline-block;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-right: 5px;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+        .tag-food { background: #FFF3CD; color: #856404; } /* Yellow for food */
+        .tag-buy { background: #D4EDDA; color: #155724; } /* Green for shopping */
+        .tag-tip { background: #E2E3E5; color: #383D41; } /* Gray for tips */
+        .tag-must { background: #F8D7DA; color: #721C24; border: 1px solid #f5c6cb;} /* Red for critical */
+
+        /* Info Section */
+        .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .info-label { color: var(--text-light); font-size: 0.9rem; }
+        .info-value { font-weight: 500; text-align: right; font-size: 0.9rem; max-width: 60%; word-break: break-all;}
+        .copy-btn { margin-left: 5px; color: var(--dark-pink); cursor: pointer; }
+
+        /* Packing List */
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+        .checklist-item input { margin-right: 15px; transform: scale(1.3); accent-color: var(--dark-pink); }
+        .checklist-item.checked span { text-decoration: line-through; color: #ccc; }
+
+        /* Expense Tracker */
+        .expense-form { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .expense-input { padding: 10px; border: 1px solid #ddd; border-radius: 8px; width: 100%; }
+        .btn-add {
+            background: var(--dark-pink); color: white; border: none;
+            padding: 10px; border-radius: 8px; grid-column: span 3; font-weight: bold;
+            cursor: pointer;
+        }
+        .expense-list { max-height: 300px; overflow-y: auto; }
+        .expense-item { display: flex; justify-content: space-between; padding: 10px; background: white; margin-bottom: 8px; border-radius: 8px; }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            text-align: center;
+            color: #ccc;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .nav-item.active { color: var(--dark-pink); }
+        .nav-item i { font-size: 1.2rem; display: block; margin-bottom: 3px; }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1 id="page-title">我的旅程</h1>
+    <div class="budget-sum" id="header-total">NT$ 0</div>
+</header>
+
+<!-- 1. 行程頁面 -->
+<div id="tab-itinerary" class="container active">
+    <!-- Content injected via JS -->
+</div>
+
+<!-- 2. 資訊頁面 (住宿+票券) -->
+<div id="tab-info" class="container">
+    <div class="card">
+        <div class="card-title"><i class="fas fa-bed"></i> 住宿資訊</div>
+        <div class="info-row">
+            <span class="info-label">倫敦</span>
+            <span class="info-value">Elizabeth Rd, London N15 5LG <a href="https://www.google.com/maps/search/?api=1&query=Elizabeth+Rd,+South+Tottenham,+London+N15+5LG" target="_blank" class="btn-nav"><i class="fas fa-map-marker-alt"></i></a></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">巴黎</span>
+            <span class="info-value">ibis Paris Alésia Montparnasse <a href="https://www.google.com/maps/search/?api=1&query=ibis+Paris+Alésia+Montparnasse+14ème" target="_blank" class="btn-nav"><i class="fas fa-map-marker-alt"></i></a></span>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title"><i class="fas fa-ticket-alt"></i> 重要票券代號</div>
+        <div class="info-row">
+            <span class="info-label">12/27 巨石陣一日遊</span>
+            <span class="info-value">訂單: 1616326907487050 <br> <span class="tag-must">PIN: 3116</span></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">12/28 大英博物館</span>
+            <span class="info-value">Order: 7943780</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">12/28 六人行展</span>
+            <span class="info-value">Code: 6926af76dd47450042ecfb49</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">12/30 巴黎迪士尼</span>
+            <span class="info-value">25KK267860120</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">12/29 歐洲之星 (去)</span>
+            <span class="info-value">07:31 - 10:49</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">12/31 歐洲之星 (回)</span>
+            <span class="info-value">17:12 - 18:30</span>
+        </div>
+    </div>
+</div>
+
+<!-- 3. 行李清單 -->
+<div id="tab-packing" class="container">
+    <div class="card">
+        <div class="card-title">證件與貴重物品</div>
+        <div id="list-docs"></div>
+    </div>
+    <div class="card">
+        <div class="card-title">衣物</div>
+        <div id="list-clothes"></div>
+    </div>
+    <div class="card">
+        <div class="card-title">盥洗保養</div>
+        <div id="list-toiletries"></div>
+    </div>
+     <div class="card">
+        <div class="card-title">藥品 & 其他</div>
+        <div id="list-others"></div>
+    </div>
+</div>
+
+<!-- 4. 記帳 -->
+<div id="tab-expense" class="container">
+    <div class="card">
+        <div class="card-title">新增花費</div>
+        <div class="expense-form">
+            <select id="ex-currency" class="expense-input">
+                <option value="GBP">英鎊 (£)</option>
+                <option value="EUR">歐元 (€)</option>
+                <option value="TWD">台幣 (NT$)</option>
+            </select>
+            <input type="number" id="ex-amount" class="expense-input" placeholder="金額">
+            <input type="text" id="ex-note" class="expense-input" placeholder="項目 (如: 晚餐)">
+            <button class="btn-add" onclick="addExpense()">記一筆</button>
+        </div>
+        <p style="font-size:0.8rem; color:#888;">*匯率估算: GBP 41, EUR 34</p>
+    </div>
+
+    <div id="expense-list" class="expense-list">
+        <!-- List items -->
+    </div>
+    <button onclick="clearExpenses()" style="width:100%; padding:10px; background:#eee; border:none; border-radius:8px; margin-top:20px; color:#666; cursor: pointer;">清除所有記帳</button>
+</div>
+
+<!-- Navigation -->
+<nav class="bottom-nav">
+    <div class="nav-item active" onclick="switchTab('itinerary')">
+        <i class="fas fa-calendar-alt"></i> 行程
+    </div>
+    <div class="nav-item" onclick="switchTab('info')">
+        <i class="fas fa-passport"></i> 資訊
+    </div>
+    <div class="nav-item" onclick="switchTab('packing')">
+        <i class="fas fa-suitcase"></i> 行李
+    </div>
+    <div class="nav-item" onclick="switchTab('expense')">
+        <i class="fas fa-coins"></i> 記帳
+    </div>
+</nav>
+
+<script>
+    // --- Data Source (Based on CSV) ---
+    const itinerary = [
+        { date: "12/24 (三)", city: "London", weather: "倫敦", items: [
+            { time: "17:00", text: "抵達倫敦 (London)", nav: "London" },
+            { time: "晚間", text: "在家休息", note: "超市採買" }
+        ]},
+        { date: "12/25 (四)", city: "London", weather: "倫敦", items: [
+            { time: "全天", text: "聖誕節 - 在家吃火鍋", note: "大眾運輸可能停駛" }
+        ]},
+        { date: "12/26 (五)", city: "London", weather: "倫敦", items: [
+            { time: "上午", text: "波羅市集 (Borough Market)", nav: "Borough Market", tags: ["必吃:生蠔/甜甜圈/蘑菇燉飯"] },
+            { time: "下午", text: "市區逛街 (Oxford St & Regent St)", nav: "Oxford Street", tags: ["Shake Shack"] },
+            { time: "19:00", text: "Winter Wonderland", nav: "Hyde Park Winter Wonderland", tags: ["冬季限定"] }
+        ]},
+        { date: "12/27 (六)", city: "London", weather: "倫敦", items: [
+            { time: "07:30", text: "一日遊集合: 維多利亞車站", nav: "Victoria Station", note: "Trip.com 巨石陣+溫莎+牛津" },
+            { time: "全天", text: "溫莎城堡 - 巨石陣 - 牛津大學" },
+            { time: "19:30", text: "解散: Gloucester Road Station", nav: "Gloucester Road Station" },
+            { time: "晚餐", text: "Wingstop", tags: ["炸雞"] }
+        ]},
+        { date: "12/28 (日)", city: "London", weather: "倫敦", items: [
+            { time: "09:00", text: "早餐: Victoria House Coffee&Food", nav: "Victoria House Coffee & Food" },
+            { time: "11:10", text: "大英博物館", nav: "The British Museum", note: "訂單:7943780" },
+            { time: "16:00", text: "Friends Exhibition (六人行展)", nav: "The Friends Experience London" },
+            { time: "20:00", text: "晚餐: Flat Iron", nav: "Flat Iron Tottenham Court Road", tags: ["必吃:牛排/免費冰淇淋"] }
+        ]},
+        { date: "12/29 (一)", city: "Paris", weather: "巴黎", items: [
+            { time: "07:31", text: "歐洲之星往巴黎", nav: "St Pancras International" },
+            { time: "午餐", text: "Armelle Creperie", nav: "Armelle Creperie" },
+            { time: "下午", text: "老佛爺/春天百貨 & Citypharma藥妝", nav: "Citypharma", tags: ["必買:貝德瑪/理膚寶水"] },
+            { time: "晚餐", text: "Les Cocottes & 巴黎鐵塔拍照", nav: "Les Cocottes Tour Eiffel" }
+        ]},
+        { date: "12/30 (二)", city: "Paris", weather: "巴黎", items: [
+            { time: "全天", text: "巴黎迪士尼 (Disneyland Paris)", nav: "Disneyland Paris", tags: ["一日兩園"] }
+        ]},
+        { date: "12/31 (三)", city: "London", weather: "倫敦", items: [
+            { time: "早餐", text: "Aux Merveilleux de Fred", tags: ["知名麵包店"] },
+            { time: "上午", text: "Rue Daguerr 市集逛逛", nav: "Rue Daguerre" },
+            { time: "17:12", text: "歐洲之星回倫敦", nav: "Gare du Nord" },
+            { time: "跨年", text: "晚餐 Five Guys & 倫敦跨年", nav: "London Eye" }
+        ]},
+        { date: "01/01 (四)", city: "London", weather: "倫敦", items: [
+            { time: "上午", text: "柯芬園 (Covent Garden)", nav: "Covent Garden", tags: ["街頭藝人", "市集"] },
+            { time: "午餐", text: "Savoy Grill – Gordon Ramsay", nav: "Savoy Grill", tags: ["威靈頓牛排"] },
+            { time: "下午", text: "Harrods 百貨", nav: "Harrods", tags: ["必買:熊熊/茶葉"] },
+            { time: "傍晚", text: "大笨鐘 + 倫敦眼拍照", nav: "Big Ben" },
+            { time: "晚餐", text: "Burger & Lobster", nav: "Burger & Lobster", tags: ["必吃:龍蝦堡"] }
+        ]},
+        { date: "01/02 (五)", city: "London", weather: "倫敦", items: [
+            { time: "上午", text: "白金漢宮交接儀式", nav: "Buckingham Palace" },
+            { time: "午餐", text: "The Red Lion", nav: "The Red Lion, Parliament Street", tags: ["英式酒吧"] },
+            { time: "下午", text: "西敏大教堂", nav: "Westminster Abbey" },
+            { time: "19:30", text: "歌劇魅影 (Phantom of the Opera)", nav: "His Majesty's Theatre", tags: ["必看經典"] }
+        ]},
+        { date: "01/03 (六)", city: "Airport", weather: "倫敦", items: [
+            { time: "21:00", text: "搭機回台灣", nav: "Heathrow Airport" }
+        ]}
+    ];
+
+    const packingList = {
+        docs: ["護照+影本", "寶寶出生證明", "Sim卡", "訂單截圖/PDF"],
+        clothes: ["內衣*4", "免洗內褲", "漂亮裙*2", "襪子*4", "夾角拖", "薄外套", "睡衣", "褲+裙兩套"],
+        toiletries: ["化妝水", "青春露", "乳液", "妝前乳", "防曬", "卸妝棉", "洗澡夾子", "浴巾/毛巾", "牙刷牙膏"],
+        others: ["普拿疼", "眼藥水", "大行李袋", "雨傘/雨衣", "行充+線", "轉接頭", "酒精/口罩"]
+    };
+
+    // --- Render Functions ---
+
+    function renderItinerary() {
+        const container = document.getElementById('tab-itinerary');
+        let html = '';
+        itinerary.forEach(day => {
+            html += `
+                <div class="card">
+                    <div class="card-date">
+                        <span>${day.date}</span>
+                        <span class="weather-badge" onclick="openWeather('${day.weather}')"><i class="fas fa-cloud-sun"></i> ${day.weather}天氣</span>
+                    </div>
+                    ${day.items.map(item => `
+                        <div class="timeline-item">
+                            <div class="timeline-time">${item.time}</div>
+                            <div class="timeline-content">
+                                <div>${item.text}</div>
+                                ${item.note ? `<div style="font-size:0.8rem; color:#888;">${item.note}</div>` : ''}
+                                ${item.tags ? item.tags.map(t => {
+                                    let cls = 'tag-tip';
+                                    if(t.includes('必吃')) cls = 'tag-food';
+                                    if(t.includes('必買')) cls = 'tag-buy';
+                                    if(t.includes('必看') || t.includes('PIN')) cls = 'tag-must';
+                                    return `<span class="tag ${cls}">${t}</span>`;
+                                }).join('') : ''}
+                                ${item.nav ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.nav)}" target="_blank" class="btn-nav"><i class="fas fa-location-arrow"></i> 導航</a>` : ''}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+
+    function renderPacking() {
+        const renderGroup = (id, items) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.innerHTML = items.map(item => {
+                const isChecked = localStorage.getItem(`pack_${item}`) === 'true' ? 'checked' : '';
+                return `
+                    <div class="checklist-item ${isChecked}" onclick="toggleCheck(this, '${item}')">
+                        <input type="checkbox" ${isChecked ? 'checked' : ''}>
+                        <span>${item}</span>
+                    </div>
+                `;
+            }).join('');
+        };
+        renderGroup('list-docs', packingList.docs);
+        renderGroup('list-clothes', packingList.clothes);
+        renderGroup('list-toiletries', packingList.toiletries);
+        renderGroup('list-others', packingList.others);
+    }
+
+    function toggleCheck(el, key) {
+        const checkbox = el.querySelector('input');
+        checkbox.checked = !checkbox.checked;
+        if(checkbox.checked) {
+            el.classList.add('checked');
+            localStorage.setItem(`pack_${key}`, 'true');
+        } else {
+            el.classList.remove('checked');
+            localStorage.removeItem(`pack_${key}`);
+        }
+    }
+
+    // --- Weather ---
+    function openWeather(city) {
+        let query = city === '倫敦' ? 'London weather' : 'Paris weather';
+        window.open(`https://www.google.com/search?q=${query}`, '_blank');
+    }
+
+    // --- Tab Switching ---
+    window.switchTab = function(tabId) {
+        document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
+        const activeTab = document.getElementById(`tab-${tabId}`);
+        if(activeTab) activeTab.classList.add('active');
+        
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        // Find the nav item that matches
+        const navItems = document.querySelectorAll('.nav-item');
+        if (tabId === 'itinerary') navItems[0].classList.add('active');
+        if (tabId === 'info') navItems[1].classList.add('active');
+        if (tabId === 'packing') navItems[2].classList.add('active');
+        if (tabId === 'expense') navItems[3].classList.add('active');
+
+        const titles = { itinerary: "我的旅程", info: "訂單與住宿", packing: "行李清單", expense: "旅遊記帳" };
+        const titleEl = document.getElementById('page-title');
+        if(titleEl) titleEl.innerText = titles[tabId];
+    }
+
+    // --- Expenses ---
+    const RATES = { GBP: 41, EUR: 34, TWD: 1 };
+    let expenses = [];
+    try {
+        expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+    } catch(e) {
+        expenses = [];
+    }
+
+    window.addExpense = function() {
+        const cur = document.getElementById('ex-currency').value;
+        const amtVal = document.getElementById('ex-amount').value;
+        const amt = parseFloat(amtVal);
+        const note = document.getElementById('ex-note').value;
+
+        if(!amtVal || isNaN(amt)) return alert("請輸入金額");
+
+        const expense = {
+            id: Date.now(),
+            cur, amt, note,
+            twd: Math.round(amt * RATES[cur])
+        };
+        expenses.unshift(expense); // Add to top
+        saveAndRenderExpenses();
+        
+        document.getElementById('ex-amount').value = '';
+        document.getElementById('ex-note').value = '';
+    }
+
+    function saveAndRenderExpenses() {
+        localStorage.setItem('expenses', JSON.stringify(expenses));
+        const listEl = document.getElementById('expense-list');
+        if (!listEl) return;
+
+        let totalTWD = 0;
+        
+        listEl.innerHTML = expenses.map(ex => {
+            totalTWD += ex.twd;
+            return `
+                <div class="expense-item">
+                    <div>
+                        <div style="font-weight:bold;">${ex.note || '未分類'}</div>
+                        <div style="font-size:0.8rem; color:#888;">${ex.cur} ${ex.amt}</div>
+                    </div>
+                    <div style="font-weight:bold; color:var(--dark-pink);">NT$ ${ex.twd}</div>
+                </div>
+            `;
+        }).join('');
+        
+        const totalEl = document.getElementById('header-total');
+        if(totalEl) totalEl.innerText = `總花費: NT$ ${totalTWD.toLocaleString()}`;
+    }
+
+    window.clearExpenses = function() {
+        if(confirm("確定要清除所有記帳資料嗎？")) {
+            expenses = [];
+            saveAndRenderExpenses();
+        }
+    }
+
+    // --- Init ---
+    document.addEventListener('DOMContentLoaded', () => {
+        renderItinerary();
+        renderPacking();
+        saveAndRenderExpenses();
+    });
+
+</script>
+</body>
+</html>
